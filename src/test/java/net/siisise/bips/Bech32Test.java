@@ -1,6 +1,5 @@
 package net.siisise.bips;
 
-import net.siisise.bips.Bech32;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,15 +18,20 @@ public class Bech32Test {
     public void testDecode() {
         System.out.println("decode");
         String code = "LNURL1DP68GURN8GHJ7AMPD3KX2AR0VEEKZAR0WD5XJTNRDAKJ7TNHV4KXCTTTDEHHWM30D3H82UNVWQHKYUNP0FJKUARJDA6KYMR9XSUQR0HD5H";
-
 //        Bech32 instance = new Bech32("LNURL");
 //        String code = "A12UEL5L";
 //        Bech32 instance = new Bech32("A");
 //        String code = "abcdef1qpzry9x8gf2tvdw0s3jn54khce6mua7lmqqqxw";
         Bech32 instance = new Bech32();
 //        byte[] expResult = new byte[0];
-        byte[] result = instance.decode(code);
-        System.out.println(new String(result));
+        byte[] skey = instance.decode(code);
+        Secp256k1 sec = new Secp256k1();
+        Secp256k1.B r = sec.scalarBaseMult(skey);
+        byte[] pub = r.toByteArray();
+        instance = new Bech32("npub");
+        String npub = instance.encode(pub);
+        System.out.println(npub);
+//        System.out.println(new String(result));
 //        assertArrayEquals(expResult, result);
     }
 

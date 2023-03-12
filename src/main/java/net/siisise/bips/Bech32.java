@@ -5,6 +5,7 @@ import java.util.Map;
 import net.siisise.io.BASE32;
 import net.siisise.io.BigBitPacket;
 import net.siisise.io.BitPacket;
+import net.siisise.io.TextEncode;
 import net.siisise.lang.Bin;
 
 /**
@@ -15,7 +16,7 @@ import net.siisise.lang.Bin;
  * 基本小文字。大文字小文字混在不可。
  * オリジナルは5ビットをintに拡張しているが、bitのままBitPacketで扱うのでいろいろ違う.
  */
-public class Bech32 {
+public class Bech32 implements TextEncode {
 
     static final int Bech32 = 1;
     static final int Bech32m = 0x2bc830a3;
@@ -51,9 +52,10 @@ public class Bech32 {
      * @param code
      * @return
      */
+    @Override
     public byte[] decode(String code) {
         Map<String,?> m = decodeMap(code);
-        return (byte[])m.get("val");
+        return (byte[])m.get(null);
     }
     
     /**
@@ -62,7 +64,8 @@ public class Bech32 {
      * @return 
      * @throws NullPointerException,IllegalStateException
      */
-    public Map<String,?> decodeMap(String code) {
+    @Override
+    public Map<String,Object> decodeMap(String code) {
         
         int sp = code.lastIndexOf('1');
         if ((hrp != null && (!code.startsWith(hrp + '1') || hrp.length() != sp)) || sp < 0 || code.length() < sp + 7) {
@@ -80,7 +83,7 @@ public class Bech32 {
         }
         Map<String,Object> m = new HashMap<>();
         m.put("hrp", h);
-        m.put("val", b32.decode(vs.substring(0,vs.length() - 6)));
+        m.put(null, b32.decode(vs.substring(0,vs.length() - 6)));
         return m;
     }
 
@@ -117,12 +120,13 @@ public class Bech32 {
         return chk;
     }
 
-    public String encode(byte[] src) {
+    @Override
+    public String encode(byte[] src, int offset, int length) {
         StringBuilder sb = new StringBuilder();
         sb.append(hrp);
         sb.append('1');
-        sb.append(b32.encode(src));
-        sb.append(encodeChecksum(createChecksum(hrp, src)));
+        sb.append(b32.encode(src, offset, length));
+        sb.append(encodeChecksum(createChecksum(hrp, src, offset, length)));
         return sb.toString();
     }
 
@@ -136,11 +140,11 @@ public class Bech32 {
      * @param data バイト列データ
      * @return チェックサム 30bit
      */
-    private int createChecksum(String hrp, byte[] data) {
+    private int createChecksum(String hrp, byte[] data, int offset, int length) {
         BitPacket bp = expandHrp(hrp);
-        bp.write(data);
-        if (data.length * 8 % 5 > 0) {
-            bp.writeBit(0, 5 - (data.length * 8 % 5));
+        bp.write(data, offset, length);
+        if (length * 8 % 5 > 0) {
+            bp.writeBit(0, 5 - (length * 8 % 5));
         }
 
         bp.writeBit(0, 30);
