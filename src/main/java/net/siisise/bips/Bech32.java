@@ -25,13 +25,18 @@ public class Bech32 implements TextEncode {
     final String hrp;
     private final int sum;
     
+    /**
+     * 
+     * @param hrp 英小文字想定
+     * @param m 
+     */
     public Bech32(String hrp, boolean m) {
         b32 = new BASE32(BASE32.Bech32);
         sum = m ? Bech32m : Bech32;
         if (hrp != null && hrp.indexOf('1') >= 0) {
             throw new java.lang.IllegalStateException();
         }
-        this.hrp = hrp;
+        this.hrp = hrp != null ? hrp.toLowerCase() : null;
     }
     
     public Bech32(boolean m) {
@@ -61,17 +66,17 @@ public class Bech32 implements TextEncode {
     /**
      * 
      * @param code
-     * @return 
+     * @return key:hrp ヘッダ , key:null 本体 
      * @throws NullPointerException,IllegalStateException
      */
     @Override
     public Map<String,Object> decodeMap(String code) {
         
         int sp = code.lastIndexOf('1');
-        if ((hrp != null && (!code.startsWith(hrp + '1') || hrp.length() != sp)) || sp < 0 || code.length() < sp + 7) {
+        String lc = code.toLowerCase();
+        if ((hrp != null && (!lc.startsWith(hrp + '1') || hrp.length() != sp)) || sp < 0 || code.length() < sp + 7) {
             throw new java.lang.IllegalStateException();
         }
-        String lc = code.toLowerCase();
         if (!lc.equals(code) && !code.toUpperCase().equals(code)) {
             throw new java.lang.IllegalStateException(); // てきとー
         }
@@ -153,7 +158,7 @@ public class Bech32 implements TextEncode {
 
     /**
      *
-     * @param hrp
+     * @param hrp 小文字想定
      * @param data data+sum
      * @return
      */
