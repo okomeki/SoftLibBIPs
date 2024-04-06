@@ -34,7 +34,7 @@ public class Bech32 implements TextEncode {
         b32 = new BASE32(BASE32.Bech32);
         sum = m ? Bech32m : Bech32;
         if (hrp != null && hrp.indexOf('1') >= 0) {
-            throw new java.lang.IllegalStateException();
+            throw new java.lang.IllegalStateException("hrpに1は含められない");
         }
         this.hrp = hrp != null ? hrp.toLowerCase() : null;
     }
@@ -43,6 +43,10 @@ public class Bech32 implements TextEncode {
         this(null,m);
     }
     
+    /**
+     * 
+     * @param hrp 
+     */
     public Bech32(String hrp) {
         this(hrp,false);
     }
